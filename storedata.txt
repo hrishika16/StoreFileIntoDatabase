@@ -1,0 +1,79 @@
+package com.example;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+public class DemoApplication {
+	
+
+	public static void StoreDataTask() throws SQLException, IOException {
+		// TODO Auto-generated constructor stub
+		String url= "jdbc:postgresql://localhost:5432/postgres";
+		String user="postgres";
+		String password="postgres";
+		
+		Connection conn = DriverManager.getConnection(url, user, password);
+		FileInputStream file = new FileInputStream(new File("NEFTRTGSJAN2023.xlsx"));
+		Workbook workbook = new XSSFWorkbook(file);
+		Sheet sheet = workbook.getSheetAt(0);
+		
+		for(Row row: sheet) {
+			PreparedStatement stmt = conn.prepareStatement("INSERT INTO mytable (bankname, outtran, damt, intran, camt) VALUES(?,?,?,?,?,?)");
+			stmt.setString(1, row.getCell(1).getStringCellValue());
+			double num = row.getCell(2).getNumericCellValue();
+			stmt.setDouble(2, num);
+			double damt = row.getCell(3).getNumericCellValue();
+			stmt.setDouble(3, damt);
+			double intran = row.getCell(4).getNumericCellValue();
+			stmt.setDouble(4, intran);
+			double camt = row.getCell(5).getNumericCellValue();
+			stmt.setDouble(5, damt);
+			stmt.executeUpdate();
+		}
+		
+		workbook.close();
+		file.close();
+		conn.close();
+	}
+
+	public static void main(String[] args) throws IOException, Exception {
+		
+
+//		data is displayed 
+//		FileInputStream file = new FileInputStream(new File("NEFTRTGSJAN2023.xlsx"));
+//		Workbook workbook = new XSSFWorkbook(file);
+//		Sheet sheet = workbook.getSheetAt(0);
+//		for(Row row : sheet) {
+//			for(Cell cell : row) {
+//				switch(cell.getCellType()) {
+//				case STRING :
+//					System.out.println(cell.getStringCellValue() + "\t");
+//					break;
+//				case NUMERIC :
+//					System.out.println(cell.getNumericCellValue() + "\t");
+//					break;
+//				case BOOLEAN :
+//					System.out.println(cell.getBooleanCellValue() + "\t");
+//					break;
+//				default:
+//					System.out.print("\t");
+//				}
+//			}
+//			System.out.println("\t");
+//		}
+		StoreDataTask();
+	}
+
+}
